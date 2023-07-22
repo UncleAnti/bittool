@@ -1,7 +1,8 @@
 #include "../bittool.h"
 #include <stdlib.h>
 
-void gen_read(FILE * /* in */, FILE * out, const char * opt){
+void gen_read(FILE * arg1, FILE * out, const char * opt){
+	UNUSED(arg1);
 	FILE* in = fopen("read.bin", "r");
 	if (!in)
 		return;
@@ -39,7 +40,8 @@ void gen_read(FILE * /* in */, FILE * out, const char * opt){
 	fclose(in);
 }
 
-void gen_write(FILE * in, FILE * /* out */, const char * opt){
+void gen_write(FILE * in, FILE * arg2, const char * opt){
+	UNUSED(arg2);
 	FILE* out = fopen("write.bin", "w");
 	if(!out)
 		return;

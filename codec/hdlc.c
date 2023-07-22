@@ -7,7 +7,7 @@ void hdlc_encode(FILE * in, FILE * out, const char * opt) {
 	int bitcount = 0;
 	int byte;
 
-	while (byte = fgetc(in) > 0){
+	while ((byte = fgetc(in)) != EOF){
 		fputc(byte, out); // Send Bit
 		bitcount++;
 
@@ -26,12 +26,13 @@ void hdlc_encode(FILE * in, FILE * out, const char * opt) {
 }
 
 void hdlc_decode(FILE * in, FILE * out, const char * opt) {
-	int space = has_char(opt, 's');
+	UNUSED(opt);
+	//int space = has_char(opt, 's');
 
   int lastfive = 0;
 	int byte;
 
-	while (byte = fgetc(in) > 0){
+	while ((byte = fgetc(in)) != EOF){
 		if (byte == '0' && lastfive == 5){
 			lastfive = 0;
 			continue;//skip the bitstuff

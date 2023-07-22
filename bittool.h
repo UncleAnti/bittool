@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #define BIT_BUF_SIZE (4096)
+#define UNUSED(arg) (void)(arg)
 
 typedef void (*fptr)(FILE*, FILE*, const char *);
 

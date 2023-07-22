@@ -13,13 +13,11 @@ void man_decode(FILE *in, FILE *out, const char * opt){
 
 	size_t out_pos = 0;
 	size_t ret = 0;
-	
-	int bitpos = 0;
-
   while ((ret = fread(in_data, sizeof(char), BIT_BUF_SIZE, in)) > 0){
 		for(size_t idx = 0; idx < ret; ++idx){
 			const uint8_t byte = in_data[idx];
 			if (byte == '0' || byte == '1'){
+				bitcount++;
 				uint8_t src = (byte == '1');
 				if (!init) {
 					init = 1;
@@ -34,6 +32,10 @@ void man_decode(FILE *in, FILE *out, const char * opt){
 					else
 						out_data[out_pos++] = '1';
 				}
+				if (bitcount == 8 && space) {
+					out_data[out_pos++] = ' ';
+					bitcount = 0;
+				}
 			}
 		}
 		fwrite(out_data, sizeof(char), out_pos, out);
@@ -46,6 +48,7 @@ void man_decode(FILE *in, FILE *out, const char * opt){
 
 void man_encode(FILE *in, FILE *out, const char * opt){
 	int space = has_char(opt, 's');
+	int bitcount = 0;
 
   char * in_data  = malloc(BIT_BUF_SIZE);
   char * out_data = malloc(BIT_BUF_SIZE << 1); // twice the size
@@ -55,6 +58,7 @@ void man_encode(FILE *in, FILE *out, const char * opt){
   while ((ret = fread(in_data, sizeof(char), BIT_BUF_SIZE, in)) > 0){
 		for(size_t idx = 0; idx < ret; ++idx){
 			const uint8_t byte = in_data[idx];
+			bitcount++;
 			switch(byte){
 			case '0':
 				out_data[out_pos++] = '0';
@@ -66,6 +70,11 @@ void man_encode(FILE *in, FILE *out, const char * opt){
 				break;
 			default:
 				out_data[out_pos++] = byte;
+			}
+			if (bitcount == 8 && space){
+				out_data[out_pos++] = ' ';
+				bitcount = 0;
+
 			}
 		}
 		fwrite(out_data, sizeof(char), out_pos, out);

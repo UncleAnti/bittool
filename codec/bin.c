@@ -20,8 +20,8 @@ void bin_encode(FILE * in, FILE * out, const char * opt){
 }
 
 void bin_decode(FILE *in, FILE *out, const char * opt){
-	int space  = has_char(opt, 's');
-	uint8_t bitcount = 0;
+	UNUSED(opt);
+	int bitcount = 0;
 	uint8_t byte = 0;
 	uint8_t bit;
 
@@ -50,6 +50,6 @@ void bin_decode(FILE *in, FILE *out, const char * opt){
 }
 
 ENGINE_EXPORT(
-	ENGINE_ENTRY("binary", 'e', bin_encode, "Convert to/from Binary."),
-	ENGINE_ENTRY("binary", 'd', bin_decode, "Convert to/from Binary.")
+	ENGINE_ENTRY("bin", 'e', bin_encode, "Convert to/from Binary."),
+	ENGINE_ENTRY("bin", 'd', bin_decode, "Convert to/from Binary.")
 );

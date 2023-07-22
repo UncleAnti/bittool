@@ -9,12 +9,16 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#ifdef __cplusplus 
 extern "C" {
+#endif
 	int fec_encode(FILE*,FILE*, const char*);
 	int fec_decode(FILE*,FILE*, const char*);
+#ifdef __cplusplus 
 }
+#endif
 
-/*
+#if 0
 int main(){
 	int p[2];
 	pipe(p);
@@ -29,8 +33,12 @@ int main(){
 	fec_decode(out, stdout, (char*)"s");
 	fclose(out);
 }
-*/
-extern "C" int has_char(const char * str, const char c){
+#endif
+
+#ifdef __cplusplus 
+extern "C" 
+#endif
+int has_char(const char * str, const char c){
 	for(size_t idx=0;idx<strlen(str); ++idx)
 		if (str[idx] == c)
 			return 1;
@@ -57,19 +65,18 @@ const struct option long_options[] = {
     {"help"  , no_argument, 0, '?'},
 		{0, 0, 0, 0}};
 
-const char usage[] = R"(Usage: %s -[e|d] engine [OPTIONS] [-[e|d] engine [OPTIONS]]...
-  -?, --help         	Display this help and exit
-  -e, --encode engine	Encode data
-  -d, --decode engine	Decode data
-  -s, --space        	Add a whitespacespace every 8 bits
-)";
+const char usage[] = "(Usage: %s -[e|d] engine [OPTIONS] [-[e|d] engine [OPTIONS]]...\n"
+"\t-?, --help         \tDisplay this help and exit\n"
+"\t-e, --encode engine\tEncode data\n"
+"\t-d, --decode engine\tDecode data\n"
+"\t-s, --space        \tAdd a whitespacespace every 8 bits\n";
 
 extern engines_t __start_engine, __stop_engine;
 
 int add_engine(char mode, const char * arg){
 	process_t *np = (process_t*)malloc(sizeof(process_t));
-	np->next = nullptr;
-	np->func = nullptr;
+	np->next = NULL;
+	np->func = NULL;
 	memset(np->opts, 0, sizeof(np->opts)); 
 
 	for (engines_t *e = &__start_engine; e < (engines_t*)&__stop_engine; e++){
@@ -91,7 +98,7 @@ int add_engine(char mode, const char * arg){
 		head = np;
 	} else {
 		process_t *it = head;
-		for(; it->next != nullptr; it=it->next);
+		for(; it->next != NULL; it=it->next);
 		it->next = np;
 	}
 	current = np;
@@ -101,6 +108,7 @@ int add_engine(char mode, const char * arg){
 void *thread_run(void * param) {
 	process_t *me = (process_t*)param;
 	me->func(me->ifd, me->ofd, me->opts);
+	fclose(me->ifd);
 	fclose(me->ofd);
 	return NULL;
 }
@@ -124,12 +132,12 @@ int main(int argc, char *argv[]){
 		case '?':{
       printf(usage, argv[0]);
 			const char * last = "";
-			if (&__start_engine != &__start_engine)
-				printf("\n  Engines:");
+			if (&__start_engine != &__stop_engine)
+				printf("\n\tEngines:\n");
 
 	    for (engines_t *p = &__start_engine; p < (engines_t*)&__stop_engine; p++){
 				if(strcmp(last, p->name) != 0){
-					printf("    %-14s\t%s\n", p->name, p->help);
+					printf("\t%-14s\t%s\n", p->name, p->help);
 					last = p->name;
 				}
 			}
@@ -159,10 +167,9 @@ int main(int argc, char *argv[]){
 		add_engine('e', "pass");
 
 	size_t numEngines = 0;
-	for(auto it = head; it != nullptr; it = it->next, ++numEngines);
+	for(process_t* it = head; it != NULL; it = it->next, ++numEngines);
 
-	int p[2], ret;
-	int *fd = (int*)malloc(sizeof(int) * numEngines * 2);
+	int p[2], *fd = (int*)malloc(sizeof(int) * numEngines * 2);
 	fd[0] = 0; // stdin
 	for(size_t idx = 1; idx < (numEngines * 2) - 1; idx += 2){
 		if(pipe(p) == 0){
@@ -172,7 +179,7 @@ int main(int argc, char *argv[]){
 	}
 	fd[(numEngines * 2) - 1] = 1; // stdout
 
-	auto it = head;
+	process_t* it = head;
 	for(size_t idx=0; idx<(numEngines*2)-1; idx += 2){
 		it->ifd = fdopen(fd[idx    ], "r");
 		it->ofd = fdopen(fd[idx + 1], "w");
@@ -180,17 +187,14 @@ int main(int argc, char *argv[]){
 	}
 	free(fd);
 
-	for(auto it = head; it != nullptr; it=it->next)
-		pthread_create(&it->thread, nullptr, thread_run, it);
+	for(process_t* it = head; it != NULL; it=it->next)
+		pthread_create(&it->thread, NULL, thread_run, it);
 
-	for(auto it = head; it != nullptr; it=it->next)
-		pthread_join(it->thread, nullptr);
+	for(process_t* it = head; it != NULL; it=it->next)
+		pthread_join(it->thread, NULL);
 
-	for(size_t idx=1; idx<numEngines; idx+=2)
-		close(fd[idx]);	
-
-	for(auto it = head; it != nullptr;) {
-		auto next = it->next;
+	for(process_t* it = head; it != NULL; ) {
+		process_t* next = it->next;
 		free(it);
 		it=next;
 	}
