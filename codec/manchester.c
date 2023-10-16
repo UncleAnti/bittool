@@ -56,7 +56,7 @@ void man_encode(FILE *in, FILE *out, const char * opt){
 	int bitcount = 0;
 
   char * in_data  = malloc(BIT_BUF_SIZE);
-  char * out_data = malloc(BIT_BUF_SIZE * 2);
+  char * out_data = malloc((BIT_BUF_SIZE * 2) + (BIT_BUF_SIZE / 8)); // allow for padding
 
 	size_t out_pos = 0;
 	size_t ret = 0;

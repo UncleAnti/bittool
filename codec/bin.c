@@ -1,22 +1,36 @@
 #include "../bittool.h"
+#include <stdlib.h>
 
 void bin_encode(FILE * in, FILE * out, const char * opt){
-	int space = has_char(opt, 's');
-	uint8_t byte;
+	int space  = has_char(opt, 's');
 
-	while (fread(&byte, sizeof(byte), 1, in) > 0){
-		for (size_t bit = 0; bit < 8; ++bit){
-			uint8_t val = (byte & 0x80) != 0;
-			fputc(val ? '1' : '0', out);
-			byte <<= 1;
+  char * in_data  = malloc(BIT_BUF_SIZE);
+  char * out_data = malloc((BIT_BUF_SIZE * 8) + ( (BIT_BUF_SIZE / 8) * space) );
+	size_t ret = 0;
+
+  while ((ret = fread(in_data, sizeof(char), BIT_BUF_SIZE, in)) > 0){
+		size_t out_pos = 0;
+		for(size_t idx=0; idx < ret; ++idx){
+			uint8_t byte = in_data[idx];
+
+			for (size_t bit = 0; bit < 8; ++bit){
+				uint8_t val = (byte & 0x80) != 0;
+				out_data[out_pos++] = (val ? '1' : '0');
+				byte <<= 1;
+			}
+
+			if (space)
+				out_data[out_pos++] = ' ';
 		}
+		fwrite(out_data, sizeof(char), out_pos, out);
+		out_pos = 0;
+  }
+	fputc('\n', out);
 
-		if (space)
-			fputc(' ', out);
-	}
+	fflush(out);
 
-	if (space)
-		fputc('\n', out);
+	free(out_data);
+	free(in_data);
 }
 
 void bin_decode(FILE *in, FILE *out, const char * opt){
