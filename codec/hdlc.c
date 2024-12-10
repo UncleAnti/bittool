@@ -7,9 +7,14 @@ void hdlc_encode(FILE * in, FILE * out, const char * opt) {
 	int bitcount = 0;
 	int byte;
 
+  fputs("01111110", out);
+	if (space) fputc(' ', out);
+
 	while ((byte = fgetc(in)) != EOF){
-		fputc(byte, out); // Send Bit
-		bitcount++;
+	  if(byte == '0' || byte == '1'){
+			fputc(byte, out);
+			bitcount++;
+		}
 
 		if(byte == '1' && ++lastfive == 5){
 			fputc('0', out); // Stuff
@@ -20,7 +25,7 @@ void hdlc_encode(FILE * in, FILE * out, const char * opt) {
 		if(byte == '0')
 			lastfive = 0;
 
-		if (space && (bitcount % 8 == 7))
+		if (space && (bitcount % 8 == 0))
 			fputc(' ', out);
 	}
 }
@@ -29,28 +34,43 @@ void hdlc_decode(FILE * in, FILE * out, const char * opt) {
 	UNUSED(opt);
 	//int space = has_char(opt, 's');
 
+	uint16_t history = 0;
   int lastfive = 0;
 	int byte;
+	int bitcounter = 0;
 
 	while ((byte = fgetc(in)) != EOF){
-		if (byte == '0' && lastfive == 5){
-			lastfive = 0;
-			continue;//skip the bitstuff
-		}
+		if(byte == '0'){
+			if(lastfive == 5){
+				lastfive = 0;
+				continue; // skip this bit
+			}
 
-		if (byte == '1' && lastfive == 5){
-			fprintf(stderr, "sync");
-			lastfive = 0;
-			continue;//skip the bitstuff
-		}
-		
-		if(byte == '1')
-			lastfive++;
-		
-		if(byte == '0')
 			lastfive = 0;
 
-		fputc(byte, out); // Send Bit
+			history <<= 1;
+			bitcounter++;
+		}
+
+		if(byte == '1'){
+			lastfive = 0;
+
+			history <<= 1;
+			history |= 1;
+			bitcounter++;
+		}
+
+		if((history & 0xFF) == 0x7E){
+			fputc('F', out);
+			history = 0;
+			bitcounter = 0;
+			continue;
+		}
+
+		if(bitcounter == 8){
+			fprintf(out, "%02X ", history);
+			history = 0;
+		}
 	}
 }
 

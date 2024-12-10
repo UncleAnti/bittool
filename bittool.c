@@ -9,41 +9,21 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 extern "C" {
 #endif
 	int fec_encode(FILE*,FILE*, const char*);
 	int fec_decode(FILE*,FILE*, const char*);
-#ifdef __cplusplus 
-}
-#endif
 
-#if 0
-int main(){
-	int p[2];
-	pipe(p);
-	FILE* in = fdopen(p[1],"w");
-	FILE* out= fdopen(p[0],"r");
-//	const char * buf = "10 01 11 11 10 10";
-	const char * buf = "100 101 111 010 110 101 111";
-//const char * buf = "     *                     ";
-	fwrite(buf, sizeof(char), strlen(buf), in);
-	fflush(in);
-	fclose(in);
-	fec_decode(out, stdout, (char*)"s");
-	fclose(out);
+	int has_char(const char * str, const char c){
+		for(size_t idx=0;idx<strlen(str); ++idx)
+			if (str[idx] == c)
+				return 1;
+		return 0;
+	}
+#ifdef __cplusplus
 }
 #endif
-
-#ifdef __cplusplus 
-extern "C" 
-#endif
-int has_char(const char * str, const char c){
-	for(size_t idx=0;idx<strlen(str); ++idx)
-		if (str[idx] == c)
-			return 1;
-	return 0;
-}
 
 typedef struct process_t {
 	fptr func;
@@ -77,7 +57,7 @@ int add_engine(char mode, const char * arg){
 	process_t *np = (process_t*)malloc(sizeof(process_t));
 	np->next = NULL;
 	np->func = NULL;
-	memset(np->opts, 0, sizeof(np->opts)); 
+	memset(np->opts, 0, sizeof(np->opts));
 
 	for (engines_t *e = &__start_engine; e < (engines_t*)&__stop_engine; e++){
 		if (strcmp(e->name, arg) == 0 && e->mode == mode){
@@ -117,18 +97,25 @@ int main(int argc, char *argv[]){
 	int opt = 0;
 	int option_index = 0;
 
-	while ((opt = getopt_long(argc, argv, "e:d:s?", long_options, &option_index)) != -1){
+	while ((opt = getopt_long(argc, argv, "e:d:s10?", long_options, &option_index)) != -1){
 		switch (opt){
+
+		case '1':
+		case '0':
 		case 's':
-			if(current)
-				strcat(current->opts, "s");
+			if(current){
+			  char nopt[2];
+			  snprintf(nopt, 2, "%c", opt);
+				strcat(current->opts, nopt);
+			}
 			break;
 
 		case 'e':
 		case 'd':
 			if(add_engine(opt, optarg))
 				return EXIT_FAILURE;
-			break;	
+			break;
+
 		case '?':{
       printf(usage, argv[0]);
 			const char * last = "";
@@ -157,7 +144,7 @@ int main(int argc, char *argv[]){
 
 	if (optind < argc){
 		fprintf(stderr, "unknown arguments: ");
-		while (optind < argc) 
+		while (optind < argc)
 			fprintf(stderr, "%s ", argv[optind++]);
 		fprintf(stderr, "\n");
 		return EXIT_FAILURE;

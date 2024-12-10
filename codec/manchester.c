@@ -13,6 +13,7 @@ void man_decode(FILE *in, FILE *out, const char * opt){
 
 	size_t out_pos = 0;
 	size_t ret = 0;
+
   while ((ret = fread(in_data, sizeof(char), BIT_BUF_SIZE, in)) > 0){
 		for(size_t idx = 0; idx < ret; ++idx){
 			const uint8_t byte = in_data[idx];
@@ -74,14 +75,13 @@ void man_encode(FILE *in, FILE *out, const char * opt){
 				out_data[out_pos++] = '0';
 				bitcount++;
 				break;
-			default:
-				out_data[out_pos++] = byte;
+			//default:
+				//out_data[out_pos++] = byte;
 			}
 
 			if (bitcount == 8 && space){
 				out_data[out_pos++] = ' ';
 				bitcount = 0;
-
 			}
 		}
 
@@ -96,6 +96,6 @@ void man_encode(FILE *in, FILE *out, const char * opt){
 }
 
 ENGINE_EXPORT(
-	ENGINE_ENTRY("manchester", 'e', man_encode, "Convert to/from manchester."),
-	ENGINE_ENTRY("manchester", 'd', man_decode, "Convert to/from manchester."),
+	ENGINE_ENTRY("manchester", 'e', man_encode, "Encode manchester."),
+	ENGINE_ENTRY("manchester", 'd', man_decode, "Decode manchester."),
 );

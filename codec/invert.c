@@ -13,16 +13,16 @@ static void invert(FILE * in, FILE * out, const char * opt){
 		size_t out_pos = 0;
 		for(size_t idx = 0; idx < ret; ++idx){
 			switch(in_data[idx]) {
-			case '1': 
+
+			case '1':
 				out_data[out_pos++] = '0';
 				bitcount++;
 				break;
+
 			case '0':
 				out_data[out_pos++] = '1';
 				bitcount++;
 				break;
-			default:
-				out_data[out_pos++] = in_data[idx];
 			}
 
 			if(space && bitcount == 8){
@@ -30,9 +30,14 @@ static void invert(FILE * in, FILE * out, const char * opt){
 				out_data[out_pos++] = ' ';
 			}
 		}
+
 		fwrite(out_data, sizeof(char), out_pos, out);
 		out_pos = 0;
   }
+
+  free(out_data);
+  free(in_data);
+
 	fflush(out);
 }
 

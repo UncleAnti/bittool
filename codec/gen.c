@@ -11,7 +11,7 @@ void gen_read(FILE * arg1, FILE * out, const char * opt){
 	int bitcount = 0;
 
   char * in_data  = malloc(BIT_BUF_SIZE);
-  char * out_data = malloc(BIT_BUF_SIZE); // twice the size
+  char * out_data = malloc(BIT_BUF_SIZE);
 
 	size_t out_pos = 0;
 	size_t ret = 0;
@@ -50,7 +50,7 @@ void gen_write(FILE * in, FILE * arg2, const char * opt){
 	int bitcount = 0;
 
   char * in_data  = malloc(BIT_BUF_SIZE);
-  char * out_data = malloc(BIT_BUF_SIZE); // twice the size
+  char * out_data = malloc(BIT_BUF_SIZE);
 
 	size_t out_pos = 0;
 	size_t ret = 0;

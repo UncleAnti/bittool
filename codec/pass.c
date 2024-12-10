@@ -14,9 +14,11 @@ void pass(FILE * in, FILE * out, const char * opt){
 		for(size_t idx = 0; idx < ret; ++idx){
 			const uint8_t byte = in_data[idx];
 
-			out_data[out_pos++] = byte;
-			if(byte == '1' || byte == '0')
+			if(byte == '1' || byte == '0'){
+				out_data[out_pos++] = byte;
 				bitcount++;
+			} else
+				continue;
 
 			if (space && bitcount == 8) {
 				bitcount = 0;

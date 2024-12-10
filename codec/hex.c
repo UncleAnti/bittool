@@ -23,7 +23,7 @@ void hex_decode(FILE * in, FILE * out, const char * opt){
 				nibble = (val - '0');
 			else if (val >= 'a' && val <= 'f')
 				nibble = (val - 'a') + 10;
-			else if (val >= 'A' && val <= 'F') 
+			else if (val >= 'A' && val <= 'F')
 				nibble = (val - 'A') + 10;
 			else
 				continue;
@@ -58,7 +58,7 @@ void hex_encode(FILE *in, FILE *out, const char * opt){
   char * out_data = malloc(BIT_BUF_SIZE >> 2); // 1/4 the size
 
 	size_t ret = 0;
-	
+
 	char byte = 0;
 	int bitpos = 0;
 
@@ -100,6 +100,6 @@ void hex_encode(FILE *in, FILE *out, const char * opt){
 }
 
 ENGINE_EXPORT(
-	ENGINE_ENTRY("hex", 'e', hex_encode, "Convert to/from hex"),
-	ENGINE_ENTRY("hex", 'd', hex_decode, "Convert to/from hex")
+	ENGINE_ENTRY("hex", 'e', hex_encode, "Convert to hex"),
+	ENGINE_ENTRY("hex", 'd', hex_decode, "Convert from hex")
 );
